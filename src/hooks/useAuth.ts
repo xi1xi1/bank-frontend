@@ -1,3 +1,4 @@
+// src/hooks/useAuth.ts - 确保正确
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 
