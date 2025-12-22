@@ -1,33 +1,39 @@
-/* 全局样式重置 */
+/* global.css - 完整修复版 */
+/* 重置所有默认样式 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-html,
-body {
+/* HTML和Body设置 */
+html {
     height: 100%;
     font-size: 14px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.5;
-    color: #333;
-    background-color: #f5f5f5;
 }
 
 body {
     margin: 0;
     padding: 0;
-    min-height: 100vh;
-}
-
-#root {
-    height: 100%;
     width: 100%;
     min-height: 100vh;
+    color: #333;
+    background-color: #f5f5f5;
+    overflow-x: hidden;
+    /* 防止水平滚动 */
 }
 
-/* 移除所有默认链接样式 */
+/* 根元素设置 */
+#root {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* 链接样式 */
 a {
     text-decoration: none;
     color: inherit;
@@ -37,16 +43,7 @@ a:hover {
     text-decoration: underline;
 }
 
-/* 响应式断点 */
-@media (max-width: 768px) {
-
-    html,
-    body {
-        font-size: 13px;
-    }
-}
-
-/* 优化滚动条 */
+/* 滚动条样式 */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -64,4 +61,263 @@ a:hover {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* ===== 登录页面专用样式 ===== */
+/* 登录页面基础样式 */
+.login-page,
+.admin-login-page,
+.register-page {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    overflow: auto !important;
+    background: #fafafa !important;
+}
+
+/* 登录页面内部容器 */
+.login-page>div,
+.admin-login-page>div,
+.register-page>div {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 登录页面的Row布局 */
+.login-page .ant-row,
+.admin-login-page .ant-row,
+.register-page .ant-row {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+/* 登录页面的Col布局 */
+.login-page .ant-col,
+.admin-login-page .ant-col,
+.register-page .ant-col {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 登录页面左侧区域 */
+.login-page .ant-col:first-child,
+.admin-login-page .ant-col:first-child,
+.register-page .ant-col:first-child {
+    background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 60px 40px !important;
+}
+
+/* 登录页面右侧区域 */
+.login-page .ant-col:last-child,
+.admin-login-page .ant-col:last-child,
+.register-page .ant-col:last-child {
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 40px !important;
+}
+
+/* 登录卡片样式 */
+.login-page .ant-card,
+.admin-login-page .ant-card,
+.register-page .ant-card {
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 auto !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+    border: 1px solid #f0f0f0 !important;
+}
+
+/* ===== 主应用布局样式 ===== */
+/* Ant Design Layout 样式 */
+.ant-layout {
+    background: #f0f2f5 !important;
+    min-height: 100vh !important;
+}
+
+.ant-layout-sider {
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+.ant-layout-header {
+    padding: 0 24px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+    background: #fff !important;
+}
+
+.ant-layout-content {
+    margin: 24px 16px !important;
+    padding: 24px !important;
+    background: #fff !important;
+    border-radius: 8px !important;
+    min-height: 280px !important;
+}
+
+/* 卡片样式 */
+.ant-card {
+    transition: all 0.3s ease !important;
+}
+
+.ant-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 菜单样式 */
+.ant-menu-item {
+    transition: all 0.2s ease !important;
+}
+
+.ant-menu-item:hover {
+    background: #f5f5f5 !important;
+}
+
+.ant-menu-item-selected {
+    background: #e6f7ff !important;
+    color: #1890ff !important;
+}
+
+/* 按钮样式 */
+.ant-btn {
+    transition: all 0.3s ease !important;
+}
+
+/* 统计卡片 */
+.stat-card {
+    text-align: center !important;
+    padding: 24px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ===== 其他页面样式 ===== */
+/* 取款页面 */
+.withdraw-page {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    min-height: 100vh !important;
+}
+
+/* 金额输入框 */
+.amount-input .ant-input-affix-wrapper {
+    font-size: 18px !important;
+    font-weight: 500 !important;
+}
+
+/* 步骤条 */
+.ant-steps-item-process .ant-steps-item-icon {
+    background: #1890ff !important;
+    border-color: #1890ff !important;
+}
+
+/* 结果页动画 */
+.result-page {
+    animation: fadeIn 0.5s ease-in-out !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 过渡动画 */
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 300ms;
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 300ms;
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 768px) {
+
+    html,
+    body {
+        font-size: 13px !important;
+    }
+
+    /* 移动端隐藏侧边栏 */
+    .ant-layout-sider {
+        display: none !important;
+    }
+
+    .ant-layout-content {
+        margin: 16px !important;
+        padding: 16px !important;
+    }
+
+    /* 登录页面移动端适配 */
+    .login-page .ant-col:first-child,
+    .admin-login-page .ant-col:first-child,
+    .register-page .ant-col:first-child {
+        display: none !important;
+    }
+
+    .login-page .ant-col:last-child,
+    .admin-login-page .ant-col:last-child,
+    .register-page .ant-col:last-child {
+        width: 100% !important;
+        padding: 20px !important;
+    }
+
+    .login-page .ant-card,
+    .admin-login-page .ant-card,
+    .register-page .ant-card {
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
+
+/* 小屏幕设备 */
+@media (max-width: 576px) {
+    .ant-layout-header {
+        padding: 0 16px !important;
+    }
+
+    .login-page .ant-card-body,
+    .admin-login-page .ant-card-body,
+    .register-page .ant-card-body {
+        padding: 24px !important;
+    }
 }

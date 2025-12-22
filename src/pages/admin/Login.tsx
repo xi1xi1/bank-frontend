@@ -21,6 +21,8 @@ import {
   BarChartOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+// 导入adminApi
+import { adminApi } from '../../api/admin';
 
 const { Title, Paragraph } = Typography;
 
@@ -29,32 +31,69 @@ const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
-  const onFinish = async (values: { username: string; password: string }) => {
-    setLoading(true);
-    try {
-      // 模拟管理员登录逻辑
-      // TODO: 替换为真实的管理员登录API调用
-      setTimeout(() => {
-        // 临时模拟登录成功
-        const mockAdminData = {
-          user_id: 'admin-001',
-          username: values.username,
-          name: '系统管理员',
-          role: 1,
-          token: 'mock-admin-token-' + Date.now()
-        };
+  // const onFinish = async (values: { username: string; password: string }) => {
+  //   setLoading(true);
+  //   try {
+  //     // 模拟管理员登录逻辑
+  //     // TODO: 替换为真实的管理员登录API调用
+  //     setTimeout(() => {
+  //       // 临时模拟登录成功
+  //       const mockAdminData = {
+  //         user_id: 'admin-001',
+  //         username: values.username,
+  //         name: '系统管理员',
+  //         role: 1,
+  //         token: 'mock-admin-token-' + Date.now()
+  //       };
         
-        localStorage.setItem('user', JSON.stringify(mockAdminData));
-        message.success('管理员登录成功！');
-        navigate('/admin/dashboard');
-      }, 1000);
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '登录失败，请检查账号密码';
-      message.error(errorMessage);
-    } finally {
-      setLoading(false);
+  //       localStorage.setItem('user', JSON.stringify(mockAdminData));
+  //       message.success('管理员登录成功！');
+  //       navigate('/admin/dashboard');
+  //     }, 1000);
+  //   } catch (error: unknown) {
+  //     const errorMessage = error instanceof Error ? error.message : '登录失败，请检查账号密码';
+  //     message.error(errorMessage);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const onFinish = async (values: { username: string; password: string }) => {
+  setLoading(true);
+  try {
+
+    
+    // 调用真实的管理员登录接口
+    const response = await adminApi.adminLogin({
+      account: values.username,  // 注意：后端要求字段名为 account
+      password: values.password
+    });
+    
+    // 处理响应
+    if (response.code === 200 && response.data) {
+      const userData = {
+        userId: response.data.userId,
+        username: response.data.username,
+        name: response.data.username, // 暂时用username，后续可以从用户信息接口获取真实姓名
+        role: response.data.role,
+        token: response.data.token,
+        is_admin: response.data.is_admin || true
+      };
+      
+      // 存储到localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      message.success('管理员登录成功！');
+      navigate('/admin/dashboard');
+    } else {
+      message.error(response.message || '登录失败');
     }
-  };
+  } catch (error: unknown) {
+    console.error('管理员登录失败:', error);
+    const errorMessage = error instanceof Error ? error.message : '登录失败，请检查账号密码';
+    message.error(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{ 

@@ -24,6 +24,7 @@ import {
 import { authApi } from '../../api/auth';
 import { useNavigate } from 'react-router-dom';
 import type { LoginRequest } from '../../api/auth';
+import { saveUser } from '../../utils/auth';
 
 const { Title, Paragraph } = Typography;
 
@@ -33,34 +34,59 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
-  const onFinish = async (values: { account: string; password: string }) => {
+  // src/pages/auth/Login.tsx - 关键修改部分
+ const onFinish = async (values: { account: string; password: string }) => {
     setLoading(true);
     try {
+      // 判断是手机号还是用户名
+      const isPhone = /^1[3-9]\d{9}$/.test(values.account);
+      
+      // 构建登录数据
       const loginData: LoginRequest = {
-        login_type: loginType,
-        password: values.password,
+        login_type: isPhone ? 'phone' : 'username',
+        password: values.password
       };
       
-      if (loginType === 'phone') {
+      if (isPhone) {
         loginData.phone = values.account;
       } else {
         loginData.username = values.account;
       }
 
+      console.log('发送登录请求:', loginData);
+      
       const response = await authApi.login(loginData);
+      console.log('收到登录响应:', response);
       
-      localStorage.setItem('user', JSON.stringify(response.data));
+      if (response.code !== 200) {
+        throw new Error(response.message || '登录失败');
+      }
       
+      // 使用统一的 saveUser 函数
+      const savedUser = saveUser(response.data);
+      
+      if (!savedUser.userId) {
+        console.error('用户信息保存失败，缺少 userId');
+        throw new Error('用户信息保存失败');
+      }
+      
+      console.log('登录成功，用户信息已保存:', savedUser);
       message.success('登录成功！');
       
-      if (response.data.role === 1) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/dashboard');
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '登录失败';
-      message.error(errorMessage);
+      // 根据角色跳转
+      setTimeout(() => {
+        if (savedUser.role === 1) {
+          console.log('管理员登录，跳转到 /admin/dashboard');
+          navigate('/admin/dashboard');
+        } else {
+          console.log('普通用户登录，跳转到 /dashboard');
+          navigate('/dashboard');
+        }
+      }, 500);
+      
+    } catch (error: any) {
+      console.error('登录失败:', error);
+      message.error(error.message || '登录失败，请检查账号密码');
     } finally {
       setLoading(false);
     }
@@ -345,7 +371,7 @@ const Login: React.FC = () => {
                 </Radio.Button>
                 <Radio.Button value="username" style={{ padding: '0 24px' }}>
                   <UserOutlined style={{ marginRight: 6 }} />
-                  账号登录
+                  用户名登录
                 </Radio.Button>
               </Radio.Group>
             </div>
@@ -362,7 +388,7 @@ const Login: React.FC = () => {
                 rules={[
                   { 
                     required: true, 
-                    message: `请输入${loginType === 'phone' ? '手机号' : '账号'}` 
+                    message: `请输入${loginType === 'phone' ? '手机号' : '用户名'}` 
                   },
                   ...(loginType === 'phone' ? [{
                     pattern: /^1[3-9]\d{9}$/, 
@@ -376,7 +402,7 @@ const Login: React.FC = () => {
                     <PhoneOutlined style={{ color: '#999' }} /> : 
                     <UserOutlined style={{ color: '#999' }} />
                   }
-                  placeholder={loginType === 'phone' ? '请输入手机号' : '请输入账号'}
+                  placeholder={loginType === 'phone' ? '请输入手机号' : '请输入用户名'}
                   allowClear
                 />
               </Form.Item>
@@ -425,7 +451,7 @@ const Login: React.FC = () => {
                 >
                   注册新账号
                 </a>
-                <a 
+                {/* <a 
                   href="/forgot-password" 
                   style={{ 
                     color: '#666'
@@ -437,7 +463,7 @@ const Login: React.FC = () => {
                   }}
                 >
                   忘记密码？
-                </a>
+                </a> */}
               </div>
 
               <Divider style={{ 
