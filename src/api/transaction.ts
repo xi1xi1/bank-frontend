@@ -1,81 +1,121 @@
-import api from '../utils/request';
+// src/api/transaction.ts
+import request from '../utils/request';
 
 export interface Transaction {
-  trans_id: number;
-  card_id: string;
-  trans_type: string;
+  transId: number;
+  transNo: string;
+  cardId: string;
+  userId: string;
+  transType: string;
+  transSubtype?: string;
   amount: number;
-  balance_after: number;
-  time: string;
-  remark: string;
-  operator_id: string;
+  balanceBefore: number;
+  balanceAfter: number;
+  fee: number;
+  currency: string;
+  status: string;
+  remark?: string;
+  operatorId: string;
+  operatorType: string;
+  transTime: string;
+  completedTime?: string;
 }
 
 export interface DepositRequest {
-  user_id: string;
-  card_id: string;
+  userId: string;
+  cardId: string;
   amount: number;
-  card_password: string;
+  cardPassword: string;
   remark?: string;
 }
 
 export interface WithdrawRequest {
-  user_id: string;
-  card_id: string;
+  userId: string;
+  cardId: string;
   amount: number;
-  card_password: string;
+  cardPassword: string;
   remark?: string;
 }
 
 export interface TransactionQueryParams {
-  user_id: string;
-  card_id?: string;
-  type?: string;
-  start_time?: string;
-  end_time?: string;
+  userId: string;
+  cardId?: string;
+  transType?: string;  // 注意：后端使用的是transType
+  startDate?: string;
+  endDate?: string;
   page?: number;
-  page_size?: number;
+  pageSize?: number;
+  sort?: 'asc' | 'desc';
+}
+
+export interface FixedDepositRequest {
+  userId: string;
+  cardId: string;
+  principal: number;
+  term: number;
+  cardPassword: string;
+  autoRenew: boolean;
+}
+
+export interface FixedDepositQueryParams {
+  userId: string;
+  cardId?: string;
+  status?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface TransactionResponse {
+  transactions: Transaction[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export const transactionApi = {
   // 活期存款
   deposit: (data: DepositRequest) =>
-    api.post<Transaction>('/transactions/deposit', data),
+    request.post<Transaction>('/transactions/deposit', data),
   
   // 活期取款
   withdraw: (data: WithdrawRequest) =>
-    api.post<Transaction>('/transactions/withdraw', data),
+    request.post<Transaction>('/transactions/withdraw', data),
   
-  // 查询交易记录
-  getTransactions: (params: TransactionQueryParams) =>
-    api.get<{
-      transactions: Transaction[];
-      pagination: {
-        page: number;
-        page_size: number;
-        total: number;
-        total_pages: number;
-      };
-    }>('/transactions', { params }),
+  // 查询交易记录 - 根据后端接口调整为正确的路径
+  getTransactions: (params: TransactionQueryParams) => {
+    // 根据后端代码，交易查询接口是 /transactions
+    // 参数映射：type -> transType
+    const queryParams = {
+      ...params,
+      transType: params.transType === 'all' ? 'ALL' : params.transType,
+    };
+    
+    return request.get<TransactionResponse>('/transactions', { params: queryParams });
+  },
+  
+  // 查询交易记录（简化版，用于列表显示）
+  getUserTransactions: (userId: string, page: number = 1, pageSize: number = 10) => {
+    return request.get<TransactionResponse>('/transactions', {
+      params: {
+        userId,
+        page,
+        pageSize,
+      }
+    });
+  },
   
   // 创建定期存款
-  createFixedDeposit: (data: {
-    user_id: string;
-    card_id: string;
-    principal: number;
-    term: number;
-    card_password: string;
-    auto_renew: boolean;
-  }) =>
-    api.post('/fixed-deposits/create', data),
+  createFixedDeposit: (data: FixedDepositRequest) =>
+    request.post('/fixed-deposits/create', data),
   
   // 查询定期存单
-  getFixedDeposits: (params: {
-    user_id: string;
-    card_id?: string;
-    status?: number;
-    page?: number;
-    page_size?: number;
-  }) =>
-    api.get('/fixed-deposits', { params }),
+  getFixedDeposits: (params: FixedDepositQueryParams) =>
+    request.get('/fixed-deposits', { params }),
+  
+  // 获取交易详情
+  getTransactionDetail: (transNo: string) =>
+    request.get<Transaction>(`/transactions/${transNo}`),
 };

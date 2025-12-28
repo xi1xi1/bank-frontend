@@ -1,13 +1,49 @@
+// src/utils/auth.ts - 完整修复版
 import { message } from 'antd';
 
 export interface User {
-  user_id: string;
+  userId: string;          // ✅ 统一使用 userId（字符串格式）
   username: string;
   phone: string;
   name: string;
   role: number;
   token: string;
+  lastLoginTime?: string;
 }
+
+/**
+ * 保存用户信息到localStorage（兼容多种后端格式）
+ */
+export const saveUser = (userData: any): User => {
+  console.log('保存用户信息，原始数据:', userData);
+  
+  // 统一处理字段名，兼容多种格式
+  const userInfo: User = {
+    userId: userData.userId || userData.user_id || userData.id || '',
+    username: userData.username || userData.userName || '',
+    phone: userData.phone || userData.phoneNumber || '',
+    name: userData.name || userData.realName || '用户',
+    role: userData.role || userData.userRole || 0,
+    token: userData.token || userData.accessToken || '',
+    lastLoginTime: userData.lastLoginTime || userData.last_login_time || new Date().toISOString()
+  };
+
+  // 验证必要字段
+  if (!userInfo.userId || !userInfo.username || !userInfo.token) {
+    console.error('用户信息不完整:', userInfo);
+    throw new Error('用户信息不完整，无法保存');
+  }
+
+  try {
+    localStorage.setItem('user', JSON.stringify(userInfo));
+    console.log('用户信息保存成功:', userInfo);
+    return userInfo;
+  } catch (error) {
+    console.error('保存用户信息失败:', error);
+    message.error('保存用户信息失败');
+    throw error;
+  }
+};
 
 /**
  * 获取当前登录用户信息
@@ -16,23 +52,30 @@ export const getCurrentUser = (): User | null => {
   try {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;
-    return JSON.parse(userStr);
+    
+    const user = JSON.parse(userStr) as User;
+    
+    // 验证数据完整性
+    if (!user.userId || !user.username || !user.token) {
+      console.warn('存储的用户信息不完整:', user);
+      clearUser();
+      return null;
+    }
+    
+    return user;
   } catch (error) {
     console.error('Failed to parse user from localStorage:', error);
+    clearUser();
     return null;
   }
 };
 
 /**
- * 保存用户信息到localStorage
+ * 获取当前用户ID - 返回字符串
  */
-export const saveUser = (user: User): void => {
-  try {
-    localStorage.setItem('user', JSON.stringify(user));
-  } catch (error) {
-    console.error('Failed to save user to localStorage:', error);
-    message.error('保存用户信息失败');
-  }
+export const getCurrentUserId = (): string | null => {
+  const user = getCurrentUser();
+  return user?.userId || null;
 };
 
 /**
@@ -71,50 +114,15 @@ export const getAuthToken = (): string => {
 };
 
 /**
- * 检查Token是否即将过期
+ * 验证登录状态，未登录则跳转
  */
-export const isTokenExpiringSoon = (): boolean => {
-  // 这里可以根据实际JWT token的过期时间来实现
-  // 暂时返回false
-  return false;
-};
-
-/**
- * 刷新Token
- */
-export const refreshToken = async (): Promise<boolean> => {
-  try {
-    // 这里可以实现token刷新逻辑
-    // 暂时返回true
-    return true;
-  } catch (error) {
-    console.error('Token refresh failed:', error);
+export const requireLogin = (): boolean => {
+  if (!isLoggedIn()) {
+    message.warning('请先登录');
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 1000);
     return false;
   }
-};
-
-/**
- * 检查页面访问权限
- */
-export const checkPagePermission = (requiredRole: 'user' | 'admin' = 'user'): boolean => {
-  if (requiredRole === 'admin') {
-    return isAdmin();
-  }
-  return isLoggedIn();
-};
-
-/**
- * 退出登录并跳转到登录页
- */
-export const logoutAndRedirect = (isAdminPage: boolean = false): void => {
-  clearUser();
-  
-  // 根据当前页面类型跳转到不同的登录页
-  if (isAdminPage) {
-    window.location.href = '/admin/login';
-  } else {
-    window.location.href = '/login';
-  }
-  
-  message.success('已退出登录');
+  return true;
 };
