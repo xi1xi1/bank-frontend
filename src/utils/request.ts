@@ -52,6 +52,7 @@ api.interceptors.response.use(
       const error = new Error(message || '请求失败');
       (error as any).response = response;
       return Promise.reject(error);
+<<<<<<< HEAD
     }
   },
   (error) => {
@@ -95,6 +96,19 @@ api.interceptors.response.use(
         }
       }
     }
+=======
+    }
+  },
+  (error) => {
+    console.error('请求失败:', error);
+    
+    if (error.response?.status === 401) {
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+      antdMessage.error('登录已过期，请重新登录');
+    }
+    
+>>>>>>> a58b2037937928f12451c94ab550e9d93946a122
     const errorMessage = error.response?.data?.message || error.message || '请求失败';
     return Promise.reject(new Error(errorMessage));
   }

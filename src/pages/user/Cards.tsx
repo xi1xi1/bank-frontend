@@ -242,7 +242,11 @@ const Cards: React.FC = () => {
         cardId: freezeCard.cardId,
         cardPassword: values.cardPassword,
         reason: values.reason,
+<<<<<<< HEAD
       //  contactPhone: values.contactPhone
+=======
+        contactPhone: values.contactPhone
+>>>>>>> a58b2037937928f12451c94ab550e9d93946a122
       };
       
       const response = await cardApi.freezeCard(freezeData);
